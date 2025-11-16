@@ -1,4 +1,4 @@
-use std::{ffi::CString, ptr};
+use std::{ffi::CString, ptr, time::Instant};
 use gl::types::{GLint, GLuint};
 use glutin::{Api, ContextBuilder, GlRequest, event::{Event, WindowEvent}, event_loop::{ControlFlow, EventLoop}, window::WindowBuilder};
 use opengl_test::{set_attribute, shaders::{Buffer, Color, Pos3, Shader, ShaderProgram, VertexArray}};
@@ -12,6 +12,7 @@ fn main() {
 
     let gl_context = ContextBuilder::new()
         .with_gl(GlRequest::Specific(Api::OpenGl, (3, 3)))
+        .with_vsync(true)
         .build_windowed(window, &event_loop)
         .expect("Cannot create windowed context");
 
@@ -66,7 +67,7 @@ fn main() {
         let pos_attrib = program.get_attrib_location("color").unwrap();
         set_attribute!(vertex_array, pos_attrib, Vertex::1);
 
-        let location = CString::new("scale").unwrap();  //
+        let location = CString::new("scale").unwrap();
         uniform_id = gl::GetUniformLocation(program.id, location.as_ptr());  // Get the location of the uniform parameter in the shader.
 
         // Bind the VBO, VAO and EBO to 0 so we dont modify it.
@@ -76,8 +77,19 @@ fn main() {
     }
 
     let mut scale: f32 = 0.5;
+    let mut last_scale_update = Instant::now();
     event_loop.run(move |event, _, control_flow| {
-        *control_flow = ControlFlow::Wait;
+        *control_flow = ControlFlow::Poll;
+
+
+        if last_scale_update.elapsed().as_secs_f32() >= 1f32 / 60f32 {
+            scale += 0.005f32;
+            if scale > 1.5 {
+                scale = 0.5;
+            }
+            last_scale_update = Instant::now();
+            gl_context.window().request_redraw();
+        }
 
         match event {
             Event::LoopDestroyed => (),
@@ -88,11 +100,6 @@ fn main() {
             },
             Event::RedrawRequested(_) => {
                 // call main redraw function
-
-                if scale > 1.5 {
-                    scale = 0.5;
-                }
-                scale += 0.01;
 
                 unsafe {
                     gl::ClearColor(0.07, 0.13, 0.17, 1.0);
