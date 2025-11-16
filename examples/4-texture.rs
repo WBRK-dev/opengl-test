@@ -3,12 +3,17 @@ use gl::types::{GLint, GLuint};
 use glutin::{Api, ContextBuilder, GlRequest, event::{Event, WindowEvent}, event_loop::{ControlFlow, EventLoop}, window::WindowBuilder};
 use opengl_test::{set_attribute, shaders::{Buffer, Color, Pos, Pos3, Shader, ShaderProgram, Texture, VertexArray}};
 
+const WIDTH: u32 = 800;
+const HEIGHT: u32 = 800;
+
 #[repr(C, packed)]
 struct Vertex(Pos3, Color, Pos);
 
 fn main() {
     let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().with_title("OpenGL in Rust");
+    let window = WindowBuilder::new()
+        .with_title("OpenGL in Rust")
+        .with_inner_size(glutin::dpi::PhysicalSize::new(WIDTH, HEIGHT));
 
     let gl_context = ContextBuilder::new()
         .with_gl(GlRequest::Specific(Api::OpenGl, (3, 3)))
