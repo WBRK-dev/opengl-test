@@ -1,0 +1,13 @@
+[package]
+name = "opengl-test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+glutin = "0.29.1"
+gl = "0.14.0"
+image = "0.25.8"
+
+# Does the same thing
+glm = "0.3.0"
+# glam = "0.30.9"
